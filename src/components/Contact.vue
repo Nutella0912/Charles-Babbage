@@ -1,218 +1,214 @@
 <template>
-  <section class="pt-5" id="contact">
-    <h1 class="text-center my-4">Contact</h1>
-
+  <h1 class="text-center my-4 pt-5" id="contact">Contact</h1>
     <div class="contact-section">
-      <div class="row align-items-center mt-4">
-        <!-- Map -->
-        <div class="col-md-6 map-container">
-          <iframe
-            id="gmap_canvas"
-            title="Google Map"
-            src="https://maps.google.com/maps?q=centro%20escolar%20university%20manila&t=&z=13&ie=UTF8&iwloc=&output=embed"
-            frameborder="0"
-            scrolling="no"
-            marginheight="0"
-            marginwidth="0"
-          ></iframe>
+        <div class="row align-items-center mt-4">
+            <div class="col-md-6 map-container">
+                <iframe id="gmap_canvas" src="https://maps.google.com/maps?q=centro%20escolar%20university%20manila&t=&z=13&ie=UTF8&iwloc=&output=embed" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe>
+            </div>
+            <div class="col-md-6">
+                <!-- binds the submitForm() function to the form submit event with @submit.prevent -->
+                <form @submit.prevent="submitForm">
+                    <div class="mb-3">
+                        <!-- bind the "name" state to the form input v-model -->
+                        <input type="text" v-model="name" class="form-control contact-form-control" placeholder="First Name M.I. Last Name">
+                    </div>
+                    <div class="mb-3">
+                        <input type="email" v-model="email" class="form-control contact-form-control" placeholder="Email">
+                    </div>
+                    <div class="mb-3">
+                        <textarea v-model="message" class="form-control contact-form-control" rows="6" placeholder="Message"></textarea>
+                    </div>
+                    <div class="form-footer">
+                        <div class="social-icons">
+<!--                                <a href="https://www.facebook.com/profile.php?id=100085701498879" id="facebook"><i class="fab fa-facebook"></i></a> -->
+                            <a href="https://www.linkedin.com/in/charles-babbage-8291a6211/" id="linkedin"><i class="fab fa-linkedin"></i></a>
+                            <a href="https://gitlab.com/cbabbage0991" id="gitlab"><i class="fab fa-gitlab"></i></a>
+                            <a href="https://github.com/cbabbage0991" id="github"><i class="fab fa-github"></i></a>
+                        </div>
+
+                        <!-- bind isLoading state to the form button with the :disabled attribute to disable the button when sending the form. -->
+                        <button type="submit" class="submit-btn pl-5 pr-5" :disabled="isLoading">
+                            {{isLoading ? "Sending..." : "Submit" }}
+                        </button>
+
+                        <!-- recaptcha checkbox -->
+                        <div class="d-flex justify-content-end mt-2">
+                            <div ref="recaptchaContainer"></div>
+                        </div>
+
+                    </div>
+                </form>
+                
+            </div>
         </div>
-
-        <!-- Form -->
-        <div class="col-md-6">
-          <form @submit.prevent="submitForm">
-            <div class="mb-3">
-              <input
-                v-model.trim="name"
-                type="text"
-                class="form-control contact-form-control"
-                placeholder="First Name M.I. Last Name"
-                :disabled="isLoading"
-                required
-              />
-            </div>
-
-            <div class="mb-3">
-              <input
-                v-model.trim="email"
-                type="email"
-                class="form-control contact-form-control"
-                placeholder="Email"
-                :disabled="isLoading"
-                required
-              />
-            </div>
-
-            <div class="mb-3">
-              <textarea
-                v-model.trim="message"
-                class="form-control contact-form-control"
-                rows="6"
-                placeholder="Message"
-                :disabled="isLoading"
-                required
-              ></textarea>
-            </div>
-
-            <div class="form-footer d-flex align-items-center justify-content-between flex-wrap gap-3">
-              <div class="social-icons">
-                <a
-                  href="https://www.linkedin.com/in/charles-babbage-8291a6211/"
-                  id="linkedin"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <i class="fab fa-linkedin"></i>
-                </a>
-
-                <a
-                  href="https://gitlab.com/cbabbage0991"
-                  id="gitlab"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <i class="fab fa-gitlab"></i>
-                </a>
-
-                <a
-                  href="https://github.com/cbabbage0991"
-                  id="github"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <i class="fab fa-github"></i>
-                </a>
-              </div>
-
-              <button type="submit" class="submit-btn px-5" :disabled="isLoading">
-                {{ isLoading ? "Sending..." : "Submit" }}
-              </button>
-
-              <div class="d-flex justify-content-end mt-2">
-              <div ref="recaptchaContainer"></div>
-              </div>
-            </div>
-          </form>
-        </div>
-      </div>
     </div>
-  </section>
 </template>
 
+
+
+
 <script setup>
-import { ref, onMounted } from "vue";
+
+import { ref, onMounted, onBeforeMount } from "vue";
+
+
 import { Notyf } from "notyf";
-import "notyf/notyf.min.css";
+import 'notyf/notyf.min.css';
+
 
 const notyf = new Notyf();
 
-/* -------------------- Web3Forms -------------------- */
+
+
+// Add your web3forms access key here
+// We can also store this in our our .env file.
 const WEB3FORMS_ACCESS_KEY = "92c148aa-5e00-45a2-ab1e-f1f6a6e84be0";
+
+
+// This will be the subject template of the email you will receive from web3forms when someone submits the contact form.
 const subject = "New message from Portfolio Contact Form";
 
-/* -------------------- Form State -------------------- */
+
+// Initial values for the form inputs
+// We use of the ref() to make them reactive.
 const name = ref("");
 const email = ref("");
 const message = ref("");
+
+// To simulate the loading state in our front end app.
 const isLoading = ref(false);
 
-const resetForm = () => {
-  name.value = "";
-  email.value = "";
-  message.value = "";
-};
 
-/* -------------------- reCAPTCHA -------------------- */
-const SITE_KEY = "6LfjsHEsAAAAANNa0dgWXsdiZX4NotmtM_B0eTMG";
+
+
+const submitForm = async () => {
+
+    // Checks if reCaptcha token is present, returns an error when not verified.
+    if (!recaptchaToken.value) {
+        notyf.error('Please verify that you are not a robot.');
+        return;
+    }
+
+
+    // Set the loading state to true
+    isLoading.value = true;
+
+    try {
+
+        const response = await fetch("https://api.web3forms.com/submit", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+            },
+            body: JSON.stringify({
+                access_key: WEB3FORMS_ACCESS_KEY,
+                subject: subject,
+                name: name.value,
+                email: email.value,
+                message: message.value,
+            }),
+
+        });
+
+        const result = await response.json();
+
+        // Checks if the form submission was successful.
+            //  If yes, displays the notification toast.
+        if(result.success) {
+            console.log(result);
+
+            isLoading.value = false;
+            notyf.success("Message Sent!");
+
+
+            // Clear form fields
+            name.value = "";
+            email.value = "";
+            message.value = "";
+
+        }
+
+    } catch (error) {
+        // If not successful, display failure notification toast.
+        console.log(error);
+
+        isLoading.value = false;
+        notyf.error("Failed to send message. Please try again.");
+
+    } finally {
+
+        // Reset captcha after submit or error.
+        resetRecaptcha();
+
+    }
+
+
+}
+
+
+
+const SITE_KEY = "6LfjsHEsAAAAANNa0dgWXsdiZX4NotmtM_B0eTMG"
 
 const recaptchaContainer = ref(null);
-const recaptchaWidgetID = ref(null);
-const recaptchaToken = ref("");
+const recaptchaWidgetId = ref(null);
+const recaptchaToken = ref('');
 
-const onRecaptchaSuccess = (token) => {
+
+// Once successfully verified the token will be stored in the recaptchaToken state variable.
+function onRecaptchaSuccess(token) {
   recaptchaToken.value = token;
-};
+}
 
-const onRecaptchaExpired = () => {
-  recaptchaToken.value = "";
-};
+// Once the has been expired or is invalid.
+function onRecaptchaExpired() {
+  recaptchaToken.value = '';
+}
 
-const renderRecaptcha = () => {
-  if (!window.grecaptcha || !recaptchaContainer.value) return;
-
-  // Prevent rendering twice
-  if (recaptchaWidgetID.value !== null) return;
-
-  recaptchaWidgetID.value = window.grecaptcha.render(recaptchaContainer.value, {
-    sitekey: SITE_KEY,
-    size: "normal",
-    callback: onRecaptchaSuccess,
-    "expired-callback": onRecaptchaExpired,
-  });
-};
-
-const resetRecaptcha = () => {
-  if (!window.grecaptcha) return;
-
-  if (recaptchaWidgetID.value !== null) {
-    window.grecaptcha.reset(recaptchaWidgetID.value);
-  }
-  recaptchaToken.value = "";
-};
-
-onMounted(() => {
-  // Wait until grecaptcha is available (script loads async)
-  const interval = setInterval(() => {
-    if (window.grecaptcha?.render) {
-      renderRecaptcha();
-      clearInterval(interval);
-    }
-  }, 100);
-});
-
-/* -------------------- Submit -------------------- */
-const submitForm = async () => {
-  if (isLoading.value) return;
-
-  if (!recaptchaToken.value) {
-    notyf.error("Please verify that you are not a robot.");
+// Renders the recaptcha component in our app.
+function renderRecaptcha() {
+  if (!window.grecaptcha) {
+    console.error('reCAPTCHA not loaded');
     return;
   }
 
-  isLoading.value = true;
+  recaptchaWidgetId.value = window.grecaptcha.render(recaptchaContainer.value, {
+    sitekey: SITE_KEY,
+    size: 'normal', // or 'compact'
+    callback: onRecaptchaSuccess,
+    'expired-callback': onRecaptchaExpired,
+  });
+}
 
-  try {
-    const response = await fetch("https://api.web3forms.com/submit", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({
-        access_key: WEB3FORMS_ACCESS_KEY,
-        subject,
-        name: name.value,
-        email: email.value,
-        message: message.value,
-
-        // Web3Forms expects this key for reCAPTCHA
-        "g-recaptcha-response": recaptchaToken.value,
-      }),
-    });
-
-    const result = await response.json();
-
-    if (!response.ok || !result?.success) {
-      throw new Error(result?.message || "Web3Forms request failed");
-    }
-
-    notyf.success("Message sent!");
-    resetForm();
-  } catch (err) {
-    console.error(err);
-    notyf.error("Failed to send message. Please try again.");
-  } finally {
-    isLoading.value = false;
-    resetRecaptcha();
+// Function to reset reCaptcha
+function resetRecaptcha() {
+  if (recaptchaWidgetId.value !== null) {
+    window.grecaptcha.reset(recaptchaWidgetId.value);
+    recaptchaToken.value = '';
   }
-};
+}
+
+
+
+onMounted(() => {
+
+    const interval = setInterval(() => {
+
+        if(window.grecaptcha && window.grecaptcha.render) {
+            renderRecaptcha();
+            clearInterval(interval);
+        }
+
+    },100);
+
+    onBeforeMount(() => {
+        clearInterval(interval);
+    })
+})
+
+
+
+
+
+
 </script>
